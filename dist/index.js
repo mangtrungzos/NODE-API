@@ -47,8 +47,23 @@ app.put('/users', (req, res) => {
     });
     res.json(users);
 });
+// DELETE
+app.delete('/users', (req, res) => {
+    const { id } = req.body;
+    // user.id different id -> array is still the same
+    // user.id = id -> remove element
+    users = users.filter((user) => user.id !== id);
+    res.json(users);
+});
+// GET one user
+app.get('/users/:id', (req, res) => {
+    const id = +req.params.id;
+    const user = users.filter(user => user.id === id);
+    res.json(user);
+});
 // starts
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
+// 23:52
 //# sourceMappingURL=index.js.map
