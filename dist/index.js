@@ -55,15 +55,24 @@ app.delete('/users', (req, res) => {
     users = users.filter((user) => user.id !== id);
     res.json(users);
 });
+const isAuthorized = (req, res, next) => {
+    const auHeader = req.headers.authorization;
+    if (auHeader === "mysecretevalue") {
+        next();
+    }
+    else {
+        res.status(401);
+        res.json({ msg: 'No access' });
+    }
+};
 // GET one user
-app.get('/users/:id', (req, res) => {
+app.get('/users/:id', isAuthorized, (req, res) => {
     const id = +req.params.id;
-    const user = users.filter(user => user.id === id);
+    const user = users.filter(user => user.id === id)[0];
     res.json(user);
 });
 // starts
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
-// 23:52
 //# sourceMappingURL=index.js.map

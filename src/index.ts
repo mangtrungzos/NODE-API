@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction, RequestHandler} from "express";
 import dotenv from "dotenv";
 
 dotenv.config({ path: __dirname + '/../.env' });
@@ -57,10 +57,20 @@ app.delete('/users', (req, res) => {
     res.json(users);
 });
 
+const isAuthorized: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+    const auHeader = req.headers.authorization;
+    if (auHeader === "mysecretevalue") {
+        next();
+    } else {
+        res.status(401);
+        res.json({ msg: 'No access' });
+    }
+};
+
 // GET one user
-app.get('/users/:id', (req, res) => {
+app.get('/users/:id', isAuthorized, (req, res) => {
     const id = +req.params.id;
-    const user = users.filter(user => user.id === id);
+    const user = users.filter(user => user.id === id)[0];
     res.json(user);
 })
 
@@ -68,5 +78,3 @@ app.get('/users/:id', (req, res) => {
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
-
-// 23:52
