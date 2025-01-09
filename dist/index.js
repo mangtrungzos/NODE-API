@@ -21,6 +21,10 @@ let users = [
     {
         id: 3,
         name: "Dev"
+    },
+    {
+        id: 4,
+        name: "Chau Ngan"
     }
 ];
 // CREATE

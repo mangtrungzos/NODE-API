@@ -18,11 +18,15 @@ let users = [
     {
         id: 3,
         name: "Dev"
+    },
+    {
+        id: 4,
+        name: "Chau Ngan"
     }
 ];
 
 // CREATE
-app.post('/users', (req, res) => {
+app.post('/users', (req: Request, res: Response) => {
     const newUser = {
         name: req.body.name,
         id: Date.now(),
@@ -32,12 +36,12 @@ app.post('/users', (req, res) => {
 });
 
 // READ
-app.get('/users', (req, res) => {
+app.get('/users', (req: Request, res: Response) => {
     res.json(users);
 });
 
 // UPDATE
-app.put('/users', (req, res) => {
+app.put('/users', (req: Request, res: Response) => {
     const { id, name } = req.body;
     users = users.map(user => {
         if (user.id === id) {
@@ -49,7 +53,7 @@ app.put('/users', (req, res) => {
 });
 
 // DELETE
-app.delete('/users', (req, res) => {
+app.delete('/users', (req: Request, res: Response) => {
     const { id } = req.body;
     // user.id different id -> array is still the same
     // user.id = id -> remove element
@@ -68,7 +72,7 @@ const isAuthorized: RequestHandler = (req: Request, res: Response, next: NextFun
 };
 
 // GET one user
-app.get('/users/:id', isAuthorized, (req, res) => {
+app.get('/users/:id', isAuthorized, (req: Request, res: Response) => {
     const id = +req.params.id;
     const user = users.filter(user => user.id === id)[0];
     res.json(user);
