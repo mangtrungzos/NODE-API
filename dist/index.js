@@ -1,79 +1,76 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config({ path: __dirname + '/../.env' });
+const mongoose_1 = __importDefault(require("mongoose"));
+const product_model_1 = require("./src/models/product.model");
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT;
 app.use(express_1.default.json());
-let users = [
-    {
-        id: 1,
-        name: "Quynh Pham"
-    },
-    {
-        id: 2,
-        name: "Queen"
-    },
-    {
-        id: 3,
-        name: "Dev"
-    },
-    {
-        id: 4,
-        name: "Chau Ngan"
+app.get('/', (req, res) => {
+    res.send("Welcome to the Courses API!");
+});
+app.get('/api/products', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const products = yield product_model_1.Product.find({});
+        res.status(200).json(products);
     }
-];
-// CREATE
-app.post('/users', (req, res) => {
-    const newUser = {
-        name: req.body.name,
-        id: Date.now(),
-    };
-    users.push(newUser);
-    res.json(newUser);
-});
-// READ
-app.get('/users', (req, res) => {
-    res.json(users);
-});
-// UPDATE
-app.put('/users', (req, res) => {
-    const { id, name } = req.body;
-    users = users.map(user => {
-        if (user.id === id) {
-            user.name = name;
-        }
-        return user;
-    });
-    res.json(users);
-});
-// DELETE
-app.delete('/users', (req, res) => {
-    const { id } = req.body;
-    // user.id different id -> array is still the same
-    // user.id = id -> remove element
-    users = users.filter((user) => user.id !== id);
-    res.json(users);
-});
-const isAuthorized = (req, res, next) => {
-    const auHeader = req.headers.authorization;
-    if (auHeader === "mysecretevalue") {
-        next();
+    catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    else {
-        res.status(401);
-        res.json({ msg: 'No access' });
+}));
+app.get('/api/products/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // const { id } = req.params;
+        const products = yield product_model_1.Product.findById(req.params.id);
+        res.status(200).json(products);
     }
-};
-// GET one user
-app.get('/users/:id', isAuthorized, (req, res) => {
-    const id = +req.params.id;
-    const user = users.filter(user => user.id === id)[0];
-    res.json(user);
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}));
+app.post('/api/products', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const product = yield product_model_1.Product.create(req.body);
+        res.status(200).json(product);
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}));
+app.put('/api/products/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const product = yield product_model_1.Product.findByIdAndUpdate(id, req.body);
+        // if (!product) {
+        //     return res.status(400).json({message: "Product not found!"});
+        // }
+        // const updateProduct = await Product.findById(id);
+        res.status(200).json(product);
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}));
+mongoose_1.default.connect(process.env.MONGODB_URL)
+    .then(() => {
+    console.log("Connected to Database!");
+})
+    .catch(() => {
+    console.log("Connection failed!");
 });
 // starts
 app.listen(port, () => {
