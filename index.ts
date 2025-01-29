@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, {NextFunction, Request, Response} from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { IProduct, Product } from "./src/models/product.model";
@@ -7,10 +7,6 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT;
 app.use(express.json());
-
-app.get('/', (req, res) => {
-    res.send("Welcome to the Courses API!");
-});
 
 app.get('/api/products', async (req, res) => {
     try {
@@ -40,17 +36,29 @@ app.post('/api/products', async (req, res) => {
     }
 });
 
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const product = await Product.findByIdAndUpdate(id, req.body);
-        // if (!product) {
-        //     return res.status(400).json({message: "Product not found!"});
-        // }
-
-        // const updateProduct = await Product.findById(id);
+        if (!product) {
+            return next(res.status(400).json({message: "Product not found!"}));
+        }
+        const updateProduct = await Product.findById(id);
         res.status(200).json(product);
     } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+});
+
+app.delete('/api/girls/:id', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const product = await Product.findByIdAndDelete(id);
+        if(!product) {
+            return next(res.status(400).json({message: "Product not found"}));
+        }
+        res.status(200).json(product);
+    } catch(error) {
         res.status(500).json({message: error.message});
     }
 });
@@ -63,7 +71,7 @@ mongoose.connect(process.env.MONGODB_URL)
         console.log("Connection failed!");
     });
 
-// starts
+// start
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });

@@ -20,9 +20,6 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT;
 app.use(express_1.default.json());
-app.get('/', (req, res) => {
-    res.send("Welcome to the Courses API!");
-});
 app.get('/api/products', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const products = yield product_model_1.Product.find({});
@@ -51,14 +48,27 @@ app.post('/api/products', (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.status(500).json({ message: error.message });
     }
 }));
-app.put('/api/products/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.put('/api/products/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const product = yield product_model_1.Product.findByIdAndUpdate(id, req.body);
-        // if (!product) {
-        //     return res.status(400).json({message: "Product not found!"});
-        // }
-        // const updateProduct = await Product.findById(id);
+        if (!product) {
+            return next(res.status(400).json({ message: "Product not found!" }));
+        }
+        const updateProduct = yield product_model_1.Product.findById(id);
+        res.status(200).json(product);
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}));
+app.delete('/api/girls/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const product = yield product_model_1.Product.findByIdAndDelete(id);
+        if (!product) {
+            return next(res.status(400).json({ message: "Product not found" }));
+        }
         res.status(200).json(product);
     }
     catch (error) {
@@ -72,7 +82,7 @@ mongoose_1.default.connect(process.env.MONGODB_URL)
     .catch(() => {
     console.log("Connection failed!");
 });
-// starts
+// start
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
